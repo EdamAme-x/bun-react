@@ -1,2 +1,2 @@
 # bun-react
-React on Bun
+build
