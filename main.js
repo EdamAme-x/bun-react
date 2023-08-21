@@ -12,16 +12,27 @@ Bun.build({
 export default {
     port,
     async fetch(request) {
-      const path = JSON.parse(JSON.stringify(request.headers))["x-original-uri"];
+      let path = JSON.parse(JSON.stringify(request.headers))["x-original-uri"];
       let file = "";
+      let fileText = "";
+      if (path.endsWith("/")) {
+        path += "index.html"
+      } 
       try {
-        file = await Bun.file("temp" + path).text();
+        file = Bun.file("temp" + path);
+        fileText = await file.text();
       }catch {
         return new Response("Not found path:" + path, new Headers({
-            status: 404
+            "status": 404
         }))
       }
-      return new Response(file);
+
+      const MIME = await file.type;
+
+      return new Response(fileText, new Headers({
+        "status": 200,
+        "Content-Type": MIME
+      }));
     },
     log: console.log("app listening port:" + port)
 };
